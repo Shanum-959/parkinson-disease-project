@@ -1,0 +1,12 @@
+flask
+librosa
+joblib
+numpy
+scikit-learn
+pydub
+pandas
+
+# cd C:\Users\admin\OneDrive\Desktop\parkinsons_app
+# venv\Scripts\activate
+# python app.py
+# http://127.0.0.1:5000
