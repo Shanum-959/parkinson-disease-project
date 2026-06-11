@@ -1,0 +1,1417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Parkinson's Disease Detection</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&family=Geist+Mono:wght@100..900&family=Rubik:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --l50:#f5f3ff;--l100:#ede9fe;--l200:#ddd6fe;--l300:#c4b5fd;
+  --l400:#a78bfa;--l500:#8b5cf6;--l600:#7c3aed;--l700:#6d28d9;
+  --l800:#4c1d95;--l900:#2e1065;--l950:#0e0520;
+  --org:#f97316;--amb:#f59e0b;--teal:#2dd4bf;--rose:#fb7185;--grn:#4ade80;
+  --cyan:#22d3ee;
+  --glass:rgba(196,181,253,0.07);--glass2:rgba(196,181,253,0.13);
+  --bdr:rgba(196,181,253,0.18);--bdr2:rgba(196,181,253,0.35);
+  --serif:'Cormorant Garamond',Georgia,serif;
+  --sans:'DM Sans',system-ui,sans-serif;
+}
+html{scroll-behavior:smooth;}
+body{font-family:var(--sans);background:var(--l950);color:#f0ebff;overflow-x:hidden;}
+
+/* ── PARTICLES ── */
+#particles{position:fixed;inset:0;pointer-events:none;z-index:0;}
+.pt{position:absolute;border-radius:50%;
+  background:radial-gradient(circle,rgba(167,139,250,0.5),transparent 70%);
+  animation:floatUp linear infinite;opacity:0;}
+@keyframes floatUp{
+  0%{transform:translateY(100vh) translateX(0);opacity:0;}
+  8%{opacity:1;}90%{opacity:0.3;}
+  100%{transform:translateY(-15vh) translateX(var(--dx));opacity:0;}
+}
+
+/* ── CURSOR GLOW ── */
+#cg{position:fixed;pointer-events:none;z-index:9999;width:420px;height:420px;
+  border-radius:50%;transform:translate(-50%,-50%);
+  background:radial-gradient(circle,rgba(139,92,246,0.09),transparent 65%);
+  transition:left .08s,top .08s;}
+
+/* ─────────────── HERO ─────────────── */
+.hero{position:relative;min-height:100vh;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  overflow:hidden;z-index:1;}
+
+.vid-wrap{position:absolute;inset:0;z-index:0;}
+.vid-wrap video{width:100%;height:100%;object-fit:cover;opacity:0.10;}
+.vid-ov{position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse 80% 55% at 50% 40%,rgba(109,40,217,0.44),transparent),
+    linear-gradient(165deg,rgba(14,5,32,.97) 0%,rgba(76,29,149,.55) 50%,rgba(14,5,32,.99) 100%);}
+
+/* ── HERO ANIMATED MESH BACKGROUND ── */
+.hero-mesh{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden;}
+.mesh-orb{position:absolute;border-radius:50%;filter:blur(80px);animation:orbFloat ease-in-out infinite;}
+.mo1{width:600px;height:600px;background:radial-gradient(ellipse,rgba(109,40,217,0.25),transparent 70%);
+  top:-10%;left:-5%;animation-duration:18s;animation-delay:0s;}
+.mo2{width:500px;height:500px;background:radial-gradient(ellipse,rgba(249,115,22,0.12),transparent 70%);
+  top:30%;right:-8%;animation-duration:22s;animation-delay:-6s;}
+.mo3{width:400px;height:400px;background:radial-gradient(ellipse,rgba(45,212,191,0.10),transparent 70%);
+  bottom:-5%;left:30%;animation-duration:16s;animation-delay:-9s;}
+@keyframes orbFloat{
+  0%,100%{transform:translate(0,0) scale(1);}
+  33%{transform:translate(30px,-40px) scale(1.08);}
+  66%{transform:translate(-20px,25px) scale(0.94);}
+}
+
+/* ── SCANLINE OVERLAY ── */
+.hero::after{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.03) 2px,rgba(0,0,0,0.03) 4px);
+  opacity:0.5;}
+
+/* rings */
+.ring{position:absolute;border-radius:50%;
+  border:1px solid rgba(167,139,250,0.08);
+  animation:rspin linear infinite;pointer-events:none;z-index:1;top:50%;left:50%;}
+.ring.ring-accent{border-color:rgba(249,115,22,0.05);border-width:2px;}
+@keyframes rspin{
+  from{transform:translate(-50%,-50%) rotate(0deg);}
+  to{transform:translate(-50%,-50%) rotate(360deg);}
+}
+
+/* ── RESTORED HERO TITLE ── */
+.hero-h1{
+  font-family:var(--serif);
+  font-size:clamp(2.6rem,7vw,5.5rem);
+  font-weight:300;line-height:1.08;
+  letter-spacing:-.01em;margin-bottom:1.5rem;
+  animation:fadeU 1s ease .15s both;
+}
+.hero-h1 em{font-style:italic;color:var(--l300);}
+.hero-hl{color:var(--org);}
+
+/* ── GLITCH HERO TITLE ── */
+.glitch-wrap{position:relative;margin-bottom:0.6rem;}
+.glitch-title{
+  font-family:'Rubik',sans-serif;
+  font-size:clamp(2.6rem,7vw,5.6rem);
+  font-weight:800;
+  line-height:1.05;
+  letter-spacing:-.03em;
+  color:#fff;
+  position:relative;
+  display:inline-block;
+  text-transform:uppercase;
+  animation:fadeU 0.6s ease 0.1s both;
+}
+/* main glitch layers */
+.glitch-title::before,
+.glitch-title::after{
+  content:attr(data-text);
+  position:absolute;
+  inset:0;
+  font-family:'Rubik',sans-serif;
+  font-weight:800;
+  font-size:inherit;
+  letter-spacing:inherit;
+  text-transform:inherit;
+}
+.glitch-title::before{
+  color:#f97316;
+  animation:glitchTop 4s infinite linear;
+  clip-path:polygon(0 0,100% 0,100% 40%,0 40%);
+}
+.glitch-title::after{
+  color:#a78bfa;
+  animation:glitchBot 4s infinite linear;
+  clip-path:polygon(0 60%,100% 60%,100% 100%,0 100%);
+}
+@keyframes glitchTop{
+  0%,88%,100%{transform:translate(0,0);opacity:0;}
+  89%{transform:translate(-4px,-2px);opacity:0.9;}
+  90%{transform:translate(4px,0);opacity:0.7;}
+  91%{transform:translate(-2px,1px);opacity:0.8;}
+  92%,99%{transform:translate(0,0);opacity:0;}
+  93%{transform:translate(6px,-1px);opacity:0.6;}
+}
+@keyframes glitchBot{
+  0%,88%,100%{transform:translate(0,0);opacity:0;}
+  89%{transform:translate(4px,2px);opacity:0.9;}
+  90%{transform:translate(-3px,0);opacity:0.7;}
+  91%{transform:translate(2px,-1px);opacity:0.8;}
+  92%,99%{transform:translate(0,0);opacity:0;}
+  93%{transform:translate(-5px,1px);opacity:0.6;}
+}
+
+/* orange word highlight */
+.glitch-hl{
+  background:linear-gradient(90deg,var(--org),var(--amb));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+  position:relative;
+}
+.glitch-hl::after{
+  content:'';position:absolute;left:0;bottom:-4px;right:0;height:3px;
+  background:linear-gradient(90deg,var(--org),var(--amb));border-radius:999px;
+  animation:lineShimmer 2s linear infinite;background-size:200% 100%;
+}
+
+/* typewriter subtitle */
+.typewriter-line{
+  font-family:'Geist Mono',monospace;
+  font-size:clamp(.72rem,1.4vw,.95rem);
+  color:rgba(196,181,253,0.75);
+  letter-spacing:.08em;
+  margin-bottom:1.6rem;
+  animation:fadeU 0.6s ease 0.3s both;
+  min-height:1.4em;
+  display:flex;align-items:center;gap:0;
+}
+.type-char{opacity:0;transition:opacity 0.15s ease-in;}
+.type-char.visible{opacity:1;}
+.typing-caret{
+  display:inline-block;width:0;height:1em;vertical-align:bottom;
+  border-right:0.12em solid rgba(196,181,253,0.7);margin-right:-.12em;
+  animation:blink-caret 0.75s step-end infinite;
+}
+@keyframes blink-caret{from,to{opacity:1;}50%{opacity:0;}}
+
+/* ── ENHANCED BACKGROUND GRID ── */
+.hero-grid{
+  position:absolute;inset:0;z-index:0;pointer-events:none;
+  background-image:
+    linear-gradient(rgba(139,92,246,0.06) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(139,92,246,0.06) 1px,transparent 1px);
+  background-size:60px 60px;
+  mask-image:radial-gradient(ellipse 70% 70% at 50% 50%,black 30%,transparent 100%);
+  animation:gridShift 20s linear infinite;
+}
+@keyframes gridShift{from{background-position:0 0;}to{background-position:60px 60px;}}
+
+/* horizontal scan line sweeping down */
+.scan-line{
+  position:absolute;left:0;right:0;height:2px;z-index:1;pointer-events:none;
+  background:linear-gradient(90deg,transparent,rgba(139,92,246,0.35),rgba(249,115,22,0.2),transparent);
+  animation:scanDown 6s linear infinite;
+  opacity:0.6;
+}
+@keyframes scanDown{
+  0%{top:-2px;opacity:0;}
+  5%{opacity:0.6;}
+  95%{opacity:0.4;}
+  100%{top:100%;opacity:0;}
+}
+
+/* ── HERO BADGE/TICKER ── */
+.hero-badge-bar{position:absolute;top:0;left:0;right:0;z-index:3;
+  background:linear-gradient(90deg,rgba(109,40,217,0.6),rgba(249,115,22,0.3),rgba(45,212,191,0.2),rgba(109,40,217,0.6));
+  background-size:300% 100%;animation:gradShift 8s ease infinite;
+  padding:10px 0;overflow:hidden;border-bottom:1px solid rgba(196,181,253,0.15);}
+@keyframes gradShift{0%{background-position:0% 50%;}50%{background-position:100% 50%;}100%{background-position:0% 50%;}}
+.ticker-track{display:flex;animation:ticker 30s linear infinite;white-space:nowrap;gap:0;}
+.ticker-item{display:inline-flex;align-items:center;gap:6px;
+  font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(196,181,253,0.9);
+  padding:0 3rem;}
+.ticker-dot{width:4px;height:4px;border-radius:50%;background:var(--org);flex-shrink:0;}
+@keyframes ticker{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+
+/* neural svg */
+.nsv{position:absolute;inset:0;z-index:1;opacity:0.16;
+  pointer-events:none;width:100%;height:100%;}
+.nl{animation:npulse 3.2s ease-in-out infinite;}
+@keyframes npulse{0%,100%{opacity:.08;}50%{opacity:.85;}}
+
+/* hero content */
+.hc{position:relative;z-index:2;text-align:center;padding:2rem;max-width:880px;
+  margin-top:2rem;}
+
+.pill{display:inline-flex;align-items:center;gap:8px;
+  background:rgba(167,139,250,0.12);border:1px solid rgba(196,181,253,.3);
+  color:var(--l200);font-size:.67rem;letter-spacing:.22em;text-transform:uppercase;
+  padding:8px 22px;border-radius:999px;margin-bottom:2.4rem;
+  animation:fadeD .9s ease both;backdrop-filter:blur(8px);}
+.pill-dot{width:6px;height:6px;border-radius:50%;background:var(--teal);
+  animation:blink 1.8s ease-in-out infinite;}
+@keyframes blink{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.4;transform:scale(0.7);}}
+@keyframes fadeD{from{opacity:0;transform:translateY(-20px);}to{opacity:1;transform:translateY(0);}}
+
+/* ── BIG TITLE with GLITCH + GLOW ── */
+.hero h1{font-family:var(--serif);
+  font-size:clamp(2.8rem,7.5vw,6rem);font-weight:300;line-height:1.05;
+  letter-spacing:-.02em;margin-bottom:1.6rem;
+  animation:fadeU 1s ease .15s both;position:relative;}
+.hero h1 em{font-style:italic;color:var(--l300);}
+.hero h1 .hl{
+  color:var(--org);position:relative;display:inline-block;
+  text-shadow:0 0 40px rgba(249,115,22,0.4),0 0 80px rgba(249,115,22,0.15);}
+.hero h1 .hl::after{
+  content:attr(data-text);position:absolute;left:0;top:0;
+  color:var(--amb);animation:glitch 5s infinite;clip-path:polygon(0 35%,100% 35%,100% 55%,0 55%);
+  opacity:0;}
+@keyframes glitch{
+  0%,93%,100%{opacity:0;transform:translateX(0);}
+  94%{opacity:0.6;transform:translateX(-3px);}
+  95%{opacity:0.6;transform:translateX(3px);}
+  96%{opacity:0;transform:translateX(0);}
+}
+
+/* ── ANIMATED UNDERLINE ── */
+.title-line{display:block;width:120px;height:2px;margin:1.2rem auto 1.4rem;
+  background:linear-gradient(90deg,transparent,var(--org),var(--amb),var(--l400),transparent);
+  background-size:200% 100%;animation:lineShimmer 2s linear infinite, fadeU 1s ease .25s both;}
+@keyframes lineShimmer{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
+
+@keyframes fadeU{from{opacity:0;transform:translateY(28px);}to{opacity:1;transform:translateY(0);}}
+
+.hsub{font-size:1.05rem;font-weight:300;color:var(--l200);line-height:1.9;
+  max-width:540px;margin:0 auto 1.4rem;animation:fadeU 1s ease .3s both;}
+
+/* ── ACCURACY HIGHLIGHT STRIP ── */
+.acc-strip{display:inline-flex;align-items:center;gap:1.6rem;
+  background:rgba(249,115,22,0.08);border:1px solid rgba(249,115,22,0.2);
+  border-radius:999px;padding:8px 24px;margin-bottom:2.8rem;
+  animation:fadeU 1s ease .4s both;backdrop-filter:blur(8px);}
+.acc-strip-item{display:flex;align-items:center;gap:6px;font-size:.75rem;color:var(--l300);}
+.acc-strip-item strong{font-family:var(--serif);font-size:1rem;color:var(--org);font-weight:600;}
+.acc-strip-div{width:1px;height:18px;background:rgba(196,181,253,.2);}
+
+/* ── HERO MODEL CHOICE CARDS (MODERNIZED) ── */
+.mboxes{display:grid;grid-template-columns:1fr 1fr;
+  gap:1.6rem;max-width:640px;margin:0 auto;animation:fadeU 1s ease .55s both;}
+@media(max-width:560px){.mboxes{grid-template-columns:1fr;}}
+
+.mbox{
+  background:rgba(15,8,40,0.7);
+  border:1px solid var(--bdr);border-radius:28px;
+  padding:2.2rem 2rem;cursor:pointer;text-decoration:none;color:inherit;
+  transition:transform .5s cubic-bezier(.34,1.56,.64,1),border-color .35s,box-shadow .35s,background .35s;
+  position:relative;overflow:hidden;backdrop-filter:blur(20px);display:block;
+}
+/* shimmer sweep */
+.mbox::before{content:'';position:absolute;inset:0;
+  background:linear-gradient(105deg,transparent 30%,rgba(196,181,253,0.06) 50%,transparent 70%);
+  background-size:200% 100%;transition:background-position .5s;
+  background-position:200% 0;}
+.mbox:hover::before{background-position:-200% 0;}
+
+/* inner glow */
+.mbox::after{content:'';position:absolute;inset:0;border-radius:28px;
+  opacity:0;transition:opacity .4s;}
+.mbox.tab::after{background:radial-gradient(ellipse at 30% 20%,rgba(139,92,246,0.2),transparent 60%);}
+.mbox.voice::after{background:radial-gradient(ellipse at 30% 20%,rgba(45,212,191,0.15),transparent 60%);}
+.mbox:hover::after{opacity:1;}
+
+.mbox.tab{border-color:rgba(139,92,246,0.25);}
+.mbox.voice{border-color:rgba(45,212,191,0.25);}
+.mbox.tab:hover{transform:translateY(-12px) scale(1.02);border-color:rgba(167,139,250,0.5);
+  box-shadow:0 28px 70px rgba(109,40,217,0.45),inset 0 1px 0 rgba(196,181,253,0.15);}
+.mbox.voice:hover{transform:translateY(-12px) scale(1.02);border-color:rgba(45,212,191,0.5);
+  box-shadow:0 28px 70px rgba(45,212,191,0.3),inset 0 1px 0 rgba(45,212,191,0.1);}
+
+/* icon badge */
+.mbox-icon{width:58px;height:58px;border-radius:18px;display:flex;align-items:center;
+  justify-content:center;font-size:1.7rem;margin-bottom:1.3rem;position:relative;z-index:1;}
+
+/* ── ANIMATED SVG CARD ICONS ── */
+.mbox-icon svg{width:30px;height:30px;overflow:visible;}
+
+/* clipboard draw-in */
+.clip-body{fill:none;stroke:rgba(167,139,250,0.9);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;
+  stroke-dasharray:120;stroke-dashoffset:120;
+  animation:clipDraw 0.9s cubic-bezier(.65,0,.35,1) 0.3s forwards;}
+.clip-top{fill:none;stroke:rgba(167,139,250,0.9);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;
+  stroke-dasharray:40;stroke-dashoffset:40;
+  animation:clipDraw 0.5s cubic-bezier(.65,0,.35,1) 0.1s forwards;}
+.clip-line{fill:none;stroke:rgba(167,139,250,0.9);stroke-width:1.6;stroke-linecap:round;
+  stroke-dasharray:30;stroke-dashoffset:30;opacity:0;
+  animation:clipDraw 0.4s cubic-bezier(.65,0,.35,1) forwards;}
+.clip-line1{animation-delay:1s;}
+.clip-line2{animation-delay:1.15s;}
+.clip-line3{animation-delay:1.3s;}
+.clip-check{fill:none;stroke:#a78bfa;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;
+  stroke-dasharray:20;stroke-dashoffset:20;opacity:0;
+  animation:clipDraw 0.35s cubic-bezier(.65,0,.35,1) 1.45s forwards;}
+@keyframes clipDraw{to{stroke-dashoffset:0;opacity:1;}}
+
+/* mic draw-in */
+.mic-body{fill:none;stroke:rgba(45,212,191,0.9);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;
+  stroke-dasharray:80;stroke-dashoffset:80;
+  animation:clipDraw 0.7s cubic-bezier(.65,0,.35,1) 0.2s forwards;}
+.mic-arc{fill:none;stroke:rgba(45,212,191,0.9);stroke-width:1.8;stroke-linecap:round;
+  stroke-dasharray:50;stroke-dashoffset:50;
+  animation:clipDraw 0.5s cubic-bezier(.65,0,.35,1) 0.85s forwards;}
+.mic-stand{fill:none;stroke:rgba(45,212,191,0.9);stroke-width:1.8;stroke-linecap:round;
+  stroke-dasharray:25;stroke-dashoffset:25;
+  animation:clipDraw 0.35s cubic-bezier(.65,0,.35,1) 1.3s forwards;}
+/* sound wave pulses */
+.sw{fill:none;stroke:rgba(45,212,191,0.7);stroke-width:1.5;stroke-linecap:round;
+  opacity:0;animation:swPulse 1.8s ease-in-out infinite;}
+.sw1{animation-delay:1.5s;}
+.sw2{animation-delay:1.7s;}
+.sw3{animation-delay:1.9s;}
+@keyframes swPulse{0%{opacity:0;transform:scale(0.8);}40%{opacity:1;}100%{opacity:0;transform:scale(1.2);}}
+
+/* big mic in voice section */
+.mic-big-body{fill:none;stroke:rgba(45,212,191,0.85);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;
+  stroke-dasharray:140;stroke-dashoffset:140;
+  animation:clipDraw 0.9s cubic-bezier(.65,0,.35,1) 0.4s forwards;}
+.mic-big-arc{fill:none;stroke:rgba(45,212,191,0.85);stroke-width:2;stroke-linecap:round;
+  stroke-dasharray:80;stroke-dashoffset:80;
+  animation:clipDraw 0.6s cubic-bezier(.65,0,.35,1) 1.2s forwards;}
+.mic-big-stand{fill:none;stroke:rgba(45,212,191,0.85);stroke-width:2;stroke-linecap:round;
+  stroke-dasharray:40;stroke-dashoffset:40;
+  animation:clipDraw 0.4s cubic-bezier(.65,0,.35,1) 1.75s forwards;}
+.sw-big{fill:none;stroke:rgba(45,212,191,0.6);stroke-width:2;stroke-linecap:round;
+  opacity:0;animation:swPulse 2s ease-in-out infinite;}
+.sw-big1{animation-delay:2.1s;}.sw-big2{animation-delay:2.4s;}.sw-big3{animation-delay:2.7s;}
+.mbox.tab .mbox-icon{
+  background:linear-gradient(135deg,rgba(109,40,217,0.3),rgba(167,139,250,0.15));
+  border:1px solid rgba(167,139,250,0.3);
+  box-shadow:0 8px 24px rgba(109,40,217,0.25);}
+.mbox.voice .mbox-icon{
+  background:linear-gradient(135deg,rgba(45,212,191,0.2),rgba(34,211,238,0.1));
+  border:1px solid rgba(45,212,191,0.3);
+  box-shadow:0 8px 24px rgba(45,212,191,0.2);}
+
+/* pulse ring on voice icon */
+.mbox.voice .mbox-icon::before{
+  content:'';position:absolute;inset:-6px;border-radius:24px;
+  border:1px solid rgba(45,212,191,0.25);animation:pring 2s ease-in-out infinite;}
+@keyframes pring{0%,100%{transform:scale(1);opacity:0.5;}50%{transform:scale(1.08);opacity:1;}}
+
+.mtitle{font-family:var(--serif);font-size:1.6rem;font-weight:400;margin-bottom:.3rem;position:relative;z-index:1;}
+.mbox.tab .mtitle{color:var(--l100);}
+.mbox.voice .mtitle{color:var(--teal);}
+.msub{font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;margin-bottom:.9rem;position:relative;z-index:1;}
+.mbox.tab   .msub{color:var(--l500);}
+.mbox.voice .msub{color:rgba(45,212,191,0.7);}
+.mdesc{font-size:.85rem;color:rgba(221,214,254,.6);line-height:1.7;font-weight:300;position:relative;z-index:1;}
+
+/* stat chips on cards */
+.mbox-stats{display:flex;gap:.5rem;margin-top:1.1rem;position:relative;z-index:1;}
+.mstat{padding:4px 11px;border-radius:999px;font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;}
+.mbox.tab .mstat{background:rgba(139,92,246,0.12);border:1px solid rgba(167,139,250,0.2);color:var(--l400);}
+.mbox.voice .mstat{background:rgba(45,212,191,0.08);border:1px solid rgba(45,212,191,0.2);color:var(--teal);}
+
+.marrow{position:absolute;bottom:1.5rem;right:1.5rem;width:32px;height:32px;
+  border-radius:50%;border:1px solid var(--bdr);display:flex;align-items:center;
+  justify-content:center;font-size:.95rem;transition:transform .35s,background .3s,border-color .3s;z-index:1;}
+.mbox.tab:hover .marrow{transform:translate(3px,-3px);background:rgba(139,92,246,0.25);border-color:rgba(167,139,250,0.4);}
+.mbox.voice:hover .marrow{transform:translate(3px,-3px);background:rgba(45,212,191,0.2);border-color:rgba(45,212,191,0.4);}
+
+/* scroll hint */
+.schi{position:absolute;bottom:2.2rem;left:50%;transform:translateX(-50%);z-index:2;
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  color:var(--l600);font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;
+  animation:sbounce 2.2s ease infinite 2s;}
+.schi .chv{width:16px;height:16px;border-right:1.5px solid var(--l600);
+  border-bottom:1.5px solid var(--l600);transform:rotate(45deg);}
+@keyframes sbounce{0%,100%{transform:translateX(-50%) translateY(0);}
+  50%{transform:translateX(-50%) translateY(8px);}}
+
+/* ─────────────── VOICE DETECTION SECTION ─────────────── */
+.voice-sec{
+  position:relative;z-index:1;
+  padding:6rem 2rem;
+  background:linear-gradient(180deg,var(--l950) 0%,rgba(10,4,30,1) 40%,rgba(10,4,30,1) 60%,var(--l950) 100%);
+  overflow:hidden;
+}
+.voice-bg-glow{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:700px;height:700px;border-radius:50%;pointer-events:none;
+  background:radial-gradient(ellipse,rgba(45,212,191,0.06),transparent 65%);
+  animation:gp 6s ease-in-out infinite;}
+
+.voice-in{max-width:1100px;margin:0 auto;position:relative;z-index:1;}
+
+.voice-hero-card{
+  background:linear-gradient(135deg,rgba(10,5,30,0.95),rgba(6,25,25,0.9));
+  border:1px solid rgba(45,212,191,0.2);
+  border-radius:36px;
+  padding:4rem;
+  position:relative;
+  overflow:hidden;
+  backdrop-filter:blur(24px);
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:4rem;
+  align-items:center;
+}
+@media(max-width:800px){.voice-hero-card{grid-template-columns:1fr;gap:2rem;padding:2.5rem;}}
+.voice-hero-card::before{content:'';position:absolute;inset:0;border-radius:36px;
+  background:radial-gradient(ellipse at 70% 30%,rgba(45,212,191,0.08),transparent 55%);pointer-events:none;}
+
+.voice-card-corner{position:absolute;top:0;right:0;width:200px;height:200px;
+  background:radial-gradient(ellipse at 100% 0%,rgba(45,212,191,0.12),transparent 60%);
+  pointer-events:none;border-radius:36px;}
+
+/* waveform visual */
+.waveform-wrap{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:1.5rem;
+}
+.waveform{display:flex;align-items:center;justify-content:center;gap:4px;height:80px;}
+.wbar{width:5px;border-radius:3px;background:linear-gradient(to top,rgba(45,212,191,0.3),var(--teal));
+  animation:wwave ease-in-out infinite;}
+@keyframes wwave{
+  0%,100%{height:12px;opacity:0.4;}
+  50%{height:var(--h,40px);opacity:1;}
+}
+.waveform-ring{
+  width:180px;height:180px;border-radius:50%;
+  border:2px solid rgba(45,212,191,0.15);
+  display:flex;align-items:center;justify-content:center;
+  position:relative;
+  animation:vringpulse 3s ease-in-out infinite;
+}
+@keyframes vringpulse{0%,100%{box-shadow:0 0 0 0 rgba(45,212,191,0);border-color:rgba(45,212,191,0.2);}
+  50%{box-shadow:0 0 0 20px rgba(45,212,191,0.04);border-color:rgba(45,212,191,0.4);}}
+.waveform-ring::before{content:'';position:absolute;inset:-16px;border-radius:50%;
+  border:1px solid rgba(45,212,191,0.08);animation:vringpulse 3s ease-in-out infinite .8s;}
+.waveform-ring::after{content:'';position:absolute;inset:-30px;border-radius:50%;
+  border:1px solid rgba(45,212,191,0.05);animation:vringpulse 3s ease-in-out infinite 1.6s;}
+.mic-icon-big{font-size:3.5rem;position:relative;z-index:1;}
+
+.voice-acc-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(45,212,191,0.1);border:1px solid rgba(45,212,191,0.3);
+  border-radius:999px;padding:8px 20px;font-size:.85rem;color:var(--teal);
+  margin-top:1rem;
+}
+.voice-acc-badge strong{font-family:var(--serif);font-size:1.2rem;font-weight:600;}
+
+.voice-content h2{font-family:var(--serif);font-size:clamp(2rem,4vw,3rem);
+  font-weight:300;line-height:1.1;margin-bottom:1rem;color:var(--l50);}
+.voice-content h2 em{font-style:italic;color:var(--teal);}
+.voice-content p{font-size:.92rem;color:rgba(221,214,254,.65);line-height:1.8;
+  font-weight:300;margin-bottom:1.5rem;}
+
+/* MDVP feature pills */
+.mdvp-grid{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1.8rem;}
+.mdvp-tag{background:rgba(45,212,191,0.07);border:1px solid rgba(45,212,191,0.18);
+  color:rgba(45,212,191,0.85);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;
+  padding:4px 12px;border-radius:999px;transition:background .3s,transform .25s;}
+.mdvp-tag:hover{background:rgba(45,212,191,0.15);transform:translateY(-2px);}
+
+.voice-cta{
+  display:inline-flex;align-items:center;gap:10px;
+  background:linear-gradient(135deg,rgba(45,212,191,0.2),rgba(34,211,238,0.12));
+  border:1px solid rgba(45,212,191,0.4);
+  border-radius:999px;padding:14px 30px;
+  font-size:.85rem;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--teal);text-decoration:none;
+  transition:transform .4s cubic-bezier(.34,1.56,.64,1),box-shadow .3s,background .3s;
+}
+.voice-cta:hover{transform:translateY(-4px);
+  box-shadow:0 16px 40px rgba(45,212,191,0.25);
+  background:linear-gradient(135deg,rgba(45,212,191,0.28),rgba(34,211,238,0.18));}
+.voice-cta-arrow{transition:transform .3s;}
+.voice-cta:hover .voice-cta-arrow{transform:translate(4px,-4px);}
+
+/* Performance stats bar for voice */
+.voice-stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:2rem;}
+.vstat{background:rgba(45,212,191,0.06);border:1px solid rgba(45,212,191,0.12);
+  border-radius:14px;padding:1rem;text-align:center;}
+.vstat-num{font-family:var(--serif);font-size:1.5rem;font-weight:600;color:var(--teal);display:block;}
+.vstat-lbl{font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:rgba(45,212,191,0.5);margin-top:2px;}
+
+/* ─────────────── ABSTRACT ─────────────── */
+.abs-sec{position:relative;z-index:1;padding:5.5rem 2rem;
+  background:linear-gradient(180deg,var(--l950) 0%,rgba(76,29,149,.08) 50%,var(--l950) 100%);}
+.sec-in{max-width:900px;margin:0 auto;}
+
+.eyebrow{display:flex;align-items:center;gap:.8rem;
+  font-size:.63rem;letter-spacing:.28em;text-transform:uppercase;color:var(--org);margin-bottom:1rem;}
+.eyebrow::after{content:'';flex:1;height:1px;
+  background:linear-gradient(to right,rgba(249,115,22,.4),transparent);max-width:90px;}
+
+.sec-title{font-family:var(--serif);font-size:clamp(1.9rem,4vw,3rem);
+  font-weight:300;line-height:1.15;margin-bottom:.5rem;}
+
+.acard{background:var(--glass);border:1px solid var(--bdr);border-radius:26px;
+  padding:2.8rem 3.2rem;margin-top:2.5rem;position:relative;overflow:hidden;
+  backdrop-filter:blur(14px);transition:border-color .4s,box-shadow .4s;}
+.acard:hover{border-color:var(--bdr2);box-shadow:0 24px 64px rgba(109,40,217,.22);}
+.acard::before{content:'\201C';position:absolute;top:-1.5rem;left:1.8rem;
+  font-family:var(--serif);font-size:13rem;color:rgba(167,139,250,.05);
+  line-height:1;pointer-events:none;user-select:none;}
+.aglow{position:absolute;top:-60px;right:-60px;width:260px;height:260px;
+  background:radial-gradient(ellipse,rgba(139,92,246,.14),transparent 65%);
+  animation:gp 4.5s ease-in-out infinite;pointer-events:none;}
+@keyframes gp{0%,100%{opacity:.6;transform:scale(1);}50%{opacity:1;transform:scale(1.12);}}
+
+.atxt{font-family:var(--serif);font-size:1.15rem;font-weight:300;line-height:1.9;
+  color:var(--l100);font-style:italic;position:relative;z-index:1;}
+.atxt strong{font-style:normal;color:var(--l300);font-weight:400;}
+
+.kwrap{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:1.8rem;position:relative;z-index:1;}
+.kw{background:rgba(167,139,250,.1);border:1px solid rgba(196,181,253,.18);
+  color:var(--l200);font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;
+  padding:5px 13px;border-radius:999px;cursor:default;
+  transition:background .3s,transform .25s;}
+.kw:hover{background:rgba(167,139,250,.22);transform:translateY(-2px);}
+
+/* ─────────────── COMPARISON ─────────────── */
+.cmp-sec{position:relative;z-index:1;padding:5rem 2rem;}
+.cmp-in{max-width:1140px;margin:0 auto;}
+.cmp-sub{color:var(--l500);font-size:.88rem;font-weight:300;margin-top:.4rem;}
+
+.cgrid{
+  display:grid;
+  grid-template-columns:repeat(6,1fr);
+  gap:1px;
+  background:rgba(196,181,253,.08);
+  border-radius:22px;
+  /* overflow:hidden removed — was clipping the .bbadge on the best column */
+  margin-top:4rem; /* extra top margin so badge is never cut off */
+  border:1px solid var(--bdr);
+  position:relative;
+}
+@media(max-width:900px){.cgrid{grid-template-columns:repeat(3,1fr);}}
+@media(max-width:560px){.cgrid{grid-template-columns:repeat(2,1fr);}}
+
+.ccol{background:rgba(12,6,36,.85);backdrop-filter:blur(10px);transition:background .3s;}
+.ccol:first-child{border-radius:22px 0 0 22px;}
+.ccol:last-child{border-radius:0 22px 22px 0;}
+.ccol:hover{background:rgba(28,12,68,.92);}
+.ccol.best{background:rgba(25,8,55,.92);}
+
+.chead{padding:1.6rem 1rem 1.1rem;border-bottom:1px solid rgba(196,181,253,.07);
+  text-align:center;position:relative;}
+.ccol.best .chead{
+  background:linear-gradient(135deg,rgba(249,115,22,.18),rgba(245,158,11,.09));
+  position:relative;overflow:visible;
+}
+/* Animated shimmer sweep on best column head */
+.ccol.best .chead::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(105deg,transparent 35%,rgba(249,115,22,0.15) 50%,transparent 65%);
+  background-size:200% 100%;background-position:200% 0;
+  animation:bestShimmer 2.8s linear infinite;pointer-events:none;
+}
+@keyframes bestShimmer{
+  0%{background-position:200% 0;}
+  100%{background-position:-200% 0;}
+}
+/* Glowing left border accent on best column */
+.ccol.best{
+  background:rgba(25,8,55,.92);
+  box-shadow:inset 0 0 0 1px rgba(249,115,22,.35),0 0 30px rgba(249,115,22,.1);
+  position:relative;
+}
+.ccol.best::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--org),var(--amb),transparent);
+  border-radius:22px 22px 0 0;
+  animation:topGlow 2s ease-in-out infinite;pointer-events:none;z-index:5;
+}
+@keyframes topGlow{
+  0%,100%{opacity:0.7;} 50%{opacity:1;}
+}
+.bbadge{position:absolute;top:-16px;left:50%;transform:translateX(-50%);
+  background:linear-gradient(to right,var(--org),var(--amb));
+  color:#fff;font-size:.53rem;font-weight:600;letter-spacing:.16em;
+  padding:5px 14px;border-radius:999px;white-space:nowrap;
+  box-shadow:0 0 18px rgba(249,115,22,0.6),0 0 40px rgba(249,115,22,0.25);
+  animation:badgePulse 2.4s ease-in-out infinite;
+  z-index:10;}
+@keyframes badgePulse{
+  0%,100%{box-shadow:0 0 18px rgba(249,115,22,0.6),0 0 40px rgba(249,115,22,0.25);}
+  50%{box-shadow:0 0 30px rgba(249,115,22,0.9),0 0 70px rgba(249,115,22,0.4);}
+}
+.cname{font-family:var(--serif);font-size:1.05rem;font-weight:400;
+  margin-bottom:.3rem;color:var(--l100);line-height:1.2;}
+.ccol.best .cname{color:var(--org);}
+.ctype{font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--l600);}
+
+.crow{padding:.78rem .8rem;border-bottom:1px solid rgba(196,181,253,.05);
+  text-align:center;transition:background .2s;}
+.ccol:hover .crow{background:rgba(167,139,250,.03);}
+.clabel{font-size:.57rem;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--l600);margin-bottom:4px;}
+.cval{font-family:var(--serif);font-size:1rem;font-weight:400;color:var(--l100);}
+.ccol.best .cval{color:var(--org);}
+
+.mbar-w{height:3px;background:rgba(255,255,255,.04);
+  border-radius:999px;margin-top:6px;overflow:hidden;}
+.mbar{height:100%;border-radius:999px;
+  background:linear-gradient(to right,var(--l700),var(--l400));
+  width:0;transition:width 1.5s cubic-bezier(.34,1.56,.64,1);}
+.ccol.best .mbar{background:linear-gradient(to right,var(--org),var(--amb));}
+
+/* ─────────────── ACCURACY CARDS ─────────────── */
+.acc-sec{position:relative;z-index:1;padding:4rem 2rem 2rem;}
+.acc-in{max-width:1140px;margin:0 auto;}
+.acc-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(170px,1fr));
+  gap:1rem;margin-top:2.5rem;
+}
+.acc-card{
+  background:var(--glass);border:1px solid var(--bdr);border-radius:18px;
+  padding:1.4rem 1.2rem;text-align:center;
+  transition:transform .4s cubic-bezier(.34,1.56,.64,1),border-color .3s,box-shadow .3s;
+  opacity:0;transform:translateY(28px);
+}
+.acc-card.in{opacity:1;transform:translateY(0);}
+.acc-card:hover{transform:translateY(-6px) scale(1.03);border-color:var(--bdr2);
+  box-shadow:0 16px 48px rgba(109,40,217,.3);}
+.acc-card.best-card{border-color:rgba(249,115,22,.35);
+  background:linear-gradient(135deg,rgba(249,115,22,.08),rgba(167,139,250,.07));}
+.acc-card.best-card:hover{box-shadow:0 16px 48px rgba(249,115,22,.28);}
+.acc-rank{font-size:.57rem;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--l600);margin-bottom:.6rem;}
+.acc-card.best-card .acc-rank{color:var(--amb);}
+.acc-model{font-family:var(--serif);font-size:1rem;font-weight:400;
+  color:var(--l100);margin-bottom:1rem;line-height:1.2;}
+.acc-card.best-card .acc-model{color:var(--org);}
+.acc-ring-wrap{position:relative;width:80px;height:80px;margin:0 auto .9rem;}
+.acc-ring-wrap svg{transform:rotate(-90deg);}
+.acc-ring-bg{stroke:rgba(196,181,253,.1);}
+.acc-ring-fg{stroke-dasharray:220;stroke-dashoffset:220;
+  transition:stroke-dashoffset 1.6s cubic-bezier(.34,1.56,.64,1);}
+.acc-num{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  font-family:var(--serif);font-size:1.3rem;font-weight:600;color:var(--l100);}
+.acc-card.best-card .acc-num{color:var(--org);}
+.acc-badge{display:inline-block;font-size:.57rem;letter-spacing:.12em;
+  text-transform:uppercase;padding:3px 10px;border-radius:999px;margin-top:.3rem;}
+.badge-best{background:rgba(249,115,22,.15);border:1px solid rgba(249,115,22,.3);color:var(--org);}
+.badge-good{background:rgba(167,139,250,.12);border:1px solid rgba(196,181,253,.22);color:var(--l300);}
+.badge-avg{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:var(--l600);}
+
+/* ─────────────── CHART ─────────────── */
+.chart-sec{position:relative;z-index:1;padding:3rem 2rem 5rem;}
+.chart-in{max-width:900px;margin:0 auto;}
+.chart-card{background:var(--glass);border:1px solid var(--bdr);border-radius:24px;
+  padding:2.2rem;margin-top:2.2rem;backdrop-filter:blur(12px);}
+.chart-legend{display:flex;flex-wrap:wrap;gap:1.2rem;margin-bottom:1.2rem;font-size:.72rem;
+  letter-spacing:.08em;text-transform:uppercase;color:var(--l500);}
+.leg-dot{width:9px;height:9px;border-radius:2px;display:inline-block;
+  margin-right:5px;vertical-align:middle;}
+
+.note-box{
+  background:rgba(249,115,22,.07);border:1px solid rgba(249,115,22,.2);
+  border-radius:14px;padding:1rem 1.5rem;margin-top:1.8rem;
+  display:flex;align-items:flex-start;gap:.8rem;}
+.note-icon{font-size:1.2rem;flex-shrink:0;margin-top:1px;}
+.note-txt{font-size:.82rem;color:rgba(253,186,116,.85);line-height:1.6;font-weight:300;}
+.note-txt strong{color:var(--org);font-weight:500;}
+.note-txt code{background:rgba(167,139,250,.12);border-radius:4px;
+  padding:1px 6px;font-size:.78rem;color:var(--l300);}
+
+/* ─────────────── REVEAL ─────────────── */
+.rv{opacity:0;transform:translateY(36px);
+  transition:opacity .85s ease,transform .85s ease;}
+.rv.in{opacity:1;transform:translateY(0);}
+.rv.d1{transition-delay:.12s;}.rv.d2{transition-delay:.24s;}.rv.d3{transition-delay:.36s;}
+.rv.d4{transition-delay:.48s;}
+
+/* ─────────────── FOOTER ─────────────── */
+.visually-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
+footer{position:relative;z-index:1;text-align:center;padding:2.8rem 2rem;
+  border-top:1px solid rgba(196,181,253,.08);
+  color:var(--l700);font-size:.78rem;letter-spacing:.08em;}
+footer .fn{color:var(--l400);}footer .fh{color:var(--org);}
+
+/* ── GALAXY / NEBULA (same as tabular) ── */
+.nebula{position:fixed;border-radius:50%;pointer-events:none;z-index:0;filter:blur(100px);}
+.neb1{width:700px;height:700px;top:-15%;left:-10%;
+  background:radial-gradient(ellipse,rgba(109,40,217,0.22),transparent 65%);
+  animation:nebFloat1 20s ease-in-out infinite;}
+.neb2{width:500px;height:500px;top:40%;right:-8%;
+  background:radial-gradient(ellipse,rgba(249,115,22,0.11),transparent 65%);
+  animation:nebFloat2 26s ease-in-out infinite;}
+.neb3{width:400px;height:400px;bottom:-10%;left:30%;
+  background:radial-gradient(ellipse,rgba(45,212,191,0.08),transparent 65%);
+  animation:nebFloat3 18s ease-in-out infinite;}
+@keyframes nebFloat1{0%,100%{transform:translate(0,0);}50%{transform:translate(35px,-50px);}}
+@keyframes nebFloat2{0%,100%{transform:translate(0,0);}50%{transform:translate(-40px,30px);}}
+@keyframes nebFloat3{0%,100%{transform:translate(0,0);}50%{transform:translate(20px,-35px);}}
+</style>
+</head>
+<body>
+
+<div id="cg"></div>
+<div id="particles"></div>
+
+<!-- Galaxy background (same as tabular) -->
+<canvas id="galaxy" style="position:fixed;inset:0;z-index:0;pointer-events:none;"></canvas>
+<div class="nebula neb1"></div>
+<div class="nebula neb2"></div>
+<div class="nebula neb3"></div>
+
+<!-- ══════════ HERO ══════════ -->
+<div class="hero">
+
+  <!-- Animated ticker bar at top -->
+  <div class="hero-badge-bar">
+    <div class="ticker-track">
+      <span class="ticker-item"><span class="ticker-dot"></span>Gradient Boosting · Best Model · 93.08%</span>
+      <span class="ticker-item"><span class="ticker-dot"></span>Voice Model Accuracy · 89.74%</span>
+      <span class="ticker-item"><span class="ticker-dot"></span>UCI Parkinson's Dataset · 6 Classifiers</span>
+      <span class="ticker-item"><span class="ticker-dot"></span>Dual-Pathway ML Framework</span>
+      <span class="ticker-item"><span class="ticker-dot"></span>University of South Asia · Lahore</span>
+      <!-- repeated for seamless loop -->
+      <span class="ticker-item"><span class="ticker-dot"></span>Gradient Boosting · Best Model · 93.08%</span>
+      <span class="ticker-item"><span class="ticker-dot"></span>Voice Model Accuracy · 89.74%</span>
+      <span class="ticker-item"><span class="ticker-dot"></span>UCI Parkinson's Dataset · 6 Classifiers</span>
+      <span class="ticker-item"><span class="ticker-dot"></span>Dual-Pathway ML Framework</span>
+      <span class="ticker-item"><span class="ticker-dot"></span>University of South Asia · Lahore</span>
+    </div>
+  </div>
+
+  <!-- animated grid + scan -->
+  <div class="hero-grid"></div>
+  <div class="scan-line"></div>
+
+  <!-- Video background -->
+  <div class="vid-wrap">
+    <video autoplay muted loop playsinline>
+      <source src="https://assets.mixkit.co/videos/preview/mixkit-glowing-particles-floating-in-space-1978-large.mp4" type="video/mp4">
+    </video>
+  </div>
+  <div class="vid-ov"></div>
+
+  <!-- Animated mesh orbs -->
+  <div class="hero-mesh">
+    <div class="mesh-orb mo1"></div>
+    <div class="mesh-orb mo2"></div>
+    <div class="mesh-orb mo3"></div>
+  </div>
+
+  <!-- Spinning rings -->
+  <div class="ring" style="width:480px;height:480px;animation-duration:28s;"></div>
+  <div class="ring" style="width:760px;height:760px;animation-duration:44s;animation-direction:reverse;"></div>
+  <div class="ring ring-accent" style="width:1020px;height:1020px;animation-duration:60s;"></div>
+  <div class="ring" style="width:1280px;height:1280px;animation-duration:80s;animation-direction:reverse;border-color:rgba(45,212,191,0.03);"></div>
+
+  <!-- Neural network SVG -->
+  <svg class="nsv" viewBox="0 0 1400 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+    <g stroke="rgba(167,139,250,0.5)" stroke-width="0.7" fill="none">
+      <line x1="60"  y1="160" x2="260" y2="100" class="nl" style="animation-delay:0s"/>
+      <line x1="260" y1="100" x2="500" y2="230" class="nl" style="animation-delay:.35s"/>
+      <line x1="500" y1="230" x2="740" y2="110" class="nl" style="animation-delay:.7s"/>
+      <line x1="740" y1="110" x2="970" y2="270" class="nl" style="animation-delay:1.05s"/>
+      <line x1="970" y1="270" x2="1190" y2="150" class="nl" style="animation-delay:1.4s"/>
+      <line x1="1190" y1="150" x2="1370" y2="240" class="nl" style="animation-delay:1.75s"/>
+      <line x1="60"  y1="160" x2="190" y2="410" class="nl" style="animation-delay:.25s"/>
+      <line x1="190" y1="410" x2="430" y2="370" class="nl" style="animation-delay:.55s"/>
+      <line x1="430" y1="370" x2="650" y2="490" class="nl" style="animation-delay:.85s"/>
+      <line x1="650" y1="490" x2="870" y2="400" class="nl" style="animation-delay:1.15s"/>
+      <line x1="870" y1="400" x2="1090" y2="510" class="nl" style="animation-delay:1.5s"/>
+      <line x1="1090" y1="510" x2="1370" y2="430" class="nl" style="animation-delay:1.8s"/>
+      <line x1="190" y1="410" x2="150" y2="650" class="nl" style="animation-delay:.45s"/>
+      <line x1="430" y1="370" x2="370" y2="670" class="nl" style="animation-delay:.9s"/>
+      <line x1="650" y1="490" x2="610" y2="740" class="nl" style="animation-delay:1.3s"/>
+      <line x1="870" y1="400" x2="840" y2="690" class="nl" style="animation-delay:.65s"/>
+      <line x1="1090" y1="510" x2="1060" y2="770" class="nl" style="animation-delay:1s"/>
+      <line x1="260" y1="100" x2="190" y2="410" class="nl" style="animation-delay:1.6s"/>
+      <line x1="500" y1="230" x2="430" y2="370" class="nl" style="animation-delay:.18s"/>
+      <line x1="740" y1="110" x2="650" y2="490" class="nl" style="animation-delay:.55s"/>
+      <line x1="970" y1="270" x2="870" y2="400" class="nl" style="animation-delay:.92s"/>
+    </g>
+    <g fill="rgba(167,139,250,0.7)">
+      <circle cx="60"  cy="160" r="4.5" class="nl" style="animation-delay:0s"/>
+      <circle cx="260" cy="100" r="3.5" class="nl" style="animation-delay:.35s"/>
+      <circle cx="500" cy="230" r="5"   class="nl" style="animation-delay:.7s"/>
+      <circle cx="740" cy="110" r="3.5" class="nl" style="animation-delay:1.05s"/>
+      <circle cx="970" cy="270" r="4"   class="nl" style="animation-delay:1.4s"/>
+      <circle cx="1190" cy="150" r="3"  class="nl" style="animation-delay:.3s"/>
+      <circle cx="190" cy="410" r="4.5" class="nl" style="animation-delay:.55s"/>
+      <circle cx="430" cy="370" r="5"   class="nl" style="animation-delay:.85s"/>
+      <circle cx="650" cy="490" r="3.5" class="nl" style="animation-delay:1.15s"/>
+      <circle cx="870" cy="400" r="4"   class="nl" style="animation-delay:.45s"/>
+      <circle cx="1090" cy="510" r="5"  class="nl" style="animation-delay:1.5s"/>
+    </g>
+    <g fill="rgba(249,115,22,0.75)">
+      <circle cx="500" cy="230" r="2.5" class="nl" style="animation-delay:.9s"/>
+      <circle cx="870" cy="400" r="2.5" class="nl" style="animation-delay:.4s"/>
+    </g>
+  </svg>
+
+  <!-- Hero Content -->
+  <div class="hc">
+    <div class="pill">
+      <span class="pill-dot"></span>
+      AI-Powered Neurological Screening
+    </div>
+
+    <h1 class="hero-h1">
+      <em>Detecting</em> Parkinson's<br>
+      <span class="hero-hl">Before</span> It Progresses
+    </h1>
+
+    <div class="title-line"></div>
+
+    <div class="typewriter-line" id="typewriterLine" aria-label="A dual-model machine learning system that analyses clinical biomarkers and vocal signal patterns to predict Parkinson's Disease with high precision.">
+      <span class="visually-hidden">A dual-model machine learning system that analyses clinical biomarkers and vocal signal patterns to predict Parkinson's Disease with high precision.</span>
+    </div>
+
+    <!-- Accuracy strip -->
+    <div class="acc-strip">
+      <div class="acc-strip-item">Clinical Model <strong>93.08%</strong></div>
+      <div class="acc-strip-div"></div>
+      <div class="acc-strip-item">Voice Model <strong>89.74%</strong></div>
+      <div class="acc-strip-div"></div>
+      <div class="acc-strip-item">Classifiers <strong>6</strong></div>
+    </div>
+
+    <!-- Model choice cards -->
+    <div class="mboxes">
+      <a href="/tabular" class="mbox tab">
+        <div class="mbox-icon">
+          <svg viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- clipboard top clip -->
+            <path class="clip-top" d="M11 3h8a1 1 0 0 1 1 1v1H10V4a1 1 0 0 1 1-1z"/>
+            <!-- clipboard body -->
+            <path class="clip-body" d="M8 5h14a2 2 0 0 1 2 2v18a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z"/>
+            <!-- lines -->
+            <line class="clip-line clip-line1" x1="10" y1="12" x2="20" y2="12"/>
+            <line class="clip-line clip-line2" x1="10" y1="16" x2="20" y2="16"/>
+            <line class="clip-line clip-line3" x1="10" y1="20" x2="16" y2="20"/>
+            <!-- small checkmark -->
+            <polyline class="clip-check" points="17,19 19,21 23,17"/>
+          </svg>
+        </div>
+        <div class="mtitle">Clinical Data</div>
+        <div class="msub">Tabular Model</div>
+        <div class="mdesc">Enter patient medical information — age, UPDRS scores, tremor ratings — for structured ML prediction.</div>
+        <div class="mbox-stats">
+          <span class="mstat">93.08% Acc.</span>
+          <span class="mstat">6 Models</span>
+        </div>
+        <div class="marrow">↗</div>
+      </a>
+      <a href="/voice" class="mbox voice">
+        <div class="mbox-icon">
+          <svg viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- mic capsule -->
+            <path class="mic-body" d="M15 3a4 4 0 0 0-4 4v7a4 4 0 0 0 8 0V7a4 4 0 0 0-4-4z"/>
+            <!-- arc -->
+            <path class="mic-arc" d="M7 14a8 8 0 0 0 16 0"/>
+            <!-- stand line + base -->
+            <line class="mic-stand" x1="15" y1="22" x2="15" y2="26"/>
+            <line class="mic-stand" x1="10" y1="26" x2="20" y2="26"/>
+            <!-- sound waves -->
+            <path class="sw sw1" d="M4 14a11 11 0 0 0 22 0"/>
+            <path class="sw sw2" d="M1 14a14 14 0 0 0 28 0"/>
+          </svg>
+        </div>
+        <div class="mtitle">Voice Analysis</div>
+        <div class="msub">Audio Model</div>
+        <div class="mdesc">Upload or record a voice sample. MDVP acoustic features analysed for Parkinson's indicators.</div>
+        <div class="mbox-stats">
+          <span class="mstat">89.74% Acc.</span>
+          <span class="mstat">MDVP</span>
+        </div>
+        <div class="marrow">↗</div>
+      </a>
+    </div>
+  </div>
+
+  <div class="schi">
+    <span>Scroll</span>
+    <div class="chv"></div>
+  </div>
+</div>
+
+<!-- ══════════ ABSTRACT ══════════ -->
+<section class="abs-sec">
+  <div class="sec-in">
+    <div class="eyebrow rv">Abstract</div>
+    <h2 class="sec-title rv d1">Research Overview</h2>
+
+    <div class="acard rv d2">
+      <div class="aglow"></div>
+      <p class="atxt">
+        Parkinson's Disease (PD) is a progressive neurodegenerative disorder affecting
+        <strong>over 10 million people worldwide</strong>. Early and accurate diagnosis remains
+        a clinical challenge due to the subtlety of earlystage symptoms. This project presents
+        a <strong>dualpathway machine learning framework</strong> that leverages both structured
+        clinical data and acoustic vocal biomarkers to deliver reliable, non-invasive predictions.
+        Six classification algorithms including Logistic Regression, Decision Tree, Random Forest,
+        SVM, KNN, and Gradient Boosting  were trained and evaluated under
+        <strong>class-weighted balanced conditions</strong>. The final selected model,
+        <strong>Gradient Boosting Classifier</strong>, delivered the highest generalisation
+        performance and was deployed as a lightweight Django web application for rapid clinical screening.
+      </p>
+      <div class="kwrap">
+        <span class="kw">Parkinson's Disease</span>
+        <span class="kw">Machine Learning</span>
+        <span class="kw">Gradient Boosting</span>
+        <span class="kw">UPDRS Features</span>
+        <span class="kw">Vocal Biomarkers</span>
+        <span class="kw">MDVP Features</span>
+        <span class="kw">Class Imbalance</span>
+        <span class="kw">Scikit-Learn</span>
+        <span class="kw">Django</span>
+        <span class="kw">Early Detection</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ VOICE DETECTION SECTION (SEPARATE) ══════════ -->
+<section class="voice-sec rv">
+  <div class="voice-bg-glow"></div>
+  <div class="voice-in">
+    <div class="eyebrow" style="color:var(--teal);">
+      <span>Voice Detection</span>
+      <span style="flex:1;height:1px;background:linear-gradient(to right,rgba(45,212,191,.4),transparent);max-width:90px;display:block;"></span>
+    </div>
+    <h2 class="sec-title rv d1" style="color:var(--l50);margin-bottom:2.5rem;">
+      Acoustic Biomarker Analysis
+    </h2>
+
+    <div class="voice-hero-card rv d2">
+      <div class="voice-card-corner"></div>
+
+      <!-- Left: waveform visual -->
+      <div class="waveform-wrap">
+        <div class="waveform-ring">
+          <div class="mic-icon-big">
+            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:48px;height:48px;overflow:visible;">
+              <path class="mic-big-body" d="M24 4a7 7 0 0 0-7 7v12a7 7 0 0 0 14 0V11a7 7 0 0 0-7-7z"/>
+              <path class="mic-big-arc" d="M10 22a14 14 0 0 0 28 0"/>
+              <line class="mic-big-stand" x1="24" y1="36" x2="24" y2="43"/>
+              <line class="mic-big-stand" x1="15" y1="43" x2="33" y2="43"/>
+              <path class="sw-big sw-big1" d="M5 22a19 19 0 0 0 38 0"/>
+              <path class="sw-big sw-big2" d="M1 22a23 23 0 0 0 46 0"/>
+            </svg>
+          </div>
+        </div>
+        <div class="waveform" id="waveformViz"></div>
+        <div class="voice-acc-badge">
+          Model Accuracy <strong>89.74%</strong>
+        </div>
+      </div>
+
+      <!-- Right: content -->
+      <div class="voice-content">
+        <h2><em>Vocal Patterns</em> Reveal<br>Neurological Changes</h2>
+        <p>
+          Parkinson's Disease causes distinct changes in vocal cord motor control,
+          producing measurable acoustic signatures detectable years before
+          clinical motor symptoms fully emerge. Our voice model analyses
+          <strong style="color:var(--teal);">MDVP biomarkers</strong> extracted
+          from short voice recordings to classify Parkinson's risk with
+          89.74% accuracy on 39 test samples.
+        </p>
+
+        <div class="mdvp-grid">
+          <span class="mdvp-tag">MDVP:Fo</span>
+          <span class="mdvp-tag">MDVP:Fhi</span>
+          <span class="mdvp-tag">MDVP:Flo</span>
+          <span class="mdvp-tag">Jitter %</span>
+          <span class="mdvp-tag">Shimmer</span>
+          <span class="mdvp-tag">NHR</span>
+          <span class="mdvp-tag">HNR</span>
+          <span class="mdvp-tag">RPDE</span>
+          <span class="mdvp-tag">DFA</span>
+          <span class="mdvp-tag">PPE</span>
+        </div>
+
+        <!-- Performance stats -->
+        <div class="voice-stats-row">
+          <div class="vstat">
+            <span class="vstat-num">89.74%</span>
+            <span class="vstat-lbl">Accuracy</span>
+          </div>
+          <div class="vstat">
+            <span class="vstat-num">96%</span>
+            <span class="vstat-lbl">Precision PD</span>
+          </div>
+          <div class="vstat">
+            <span class="vstat-num">90%</span>
+            <span class="vstat-lbl">Recall PD</span>
+          </div>
+        </div>
+
+        <a href="/voice" class="voice-cta" style="margin-top:1.8rem;display:inline-flex;">
+          <span>Analyse Voice Sample</span>
+          <span class="voice-cta-arrow">↗</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ ACCURACY RINGS ══════════ -->
+<section class="acc-sec">
+  <div class="acc-in">
+    <div class="eyebrow rv">Metrics</div>
+    <h2 class="sec-title rv d1">Model Accuracy at a Glance</h2>
+    <p class="cmp-sub rv d2">Trained on UCI Parkinson's dataset </p>
+
+    <svg width="0" height="0">
+      <defs>
+        <linearGradient id="orgGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#f97316"/>
+          <stop offset="100%" style="stop-color:#f59e0b"/>
+        </linearGradient>
+        <linearGradient id="purpGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#6d28d9"/>
+          <stop offset="100%" style="stop-color:#a78bfa"/>
+        </linearGradient>
+        <linearGradient id="grayGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#4c1d95"/>
+          <stop offset="100%" style="stop-color:#6d28d9"/>
+        </linearGradient>
+      </defs>
+    </svg>
+
+    <div class="acc-grid" id="accGrid"></div>
+  </div>
+</section>
+
+<!-- ══════════ BAR CHART ══════════ -->
+<section class="chart-sec">
+  <div class="chart-in">
+    <div class="eyebrow rv">Visualisation</div>
+    <h2 class="sec-title rv d1">Accuracy Bar Chart</h2>
+    <p class="cmp-sub rv d2">Side-by-side comparison across all 6 classifiers</p>
+    <div class="chart-card rv d3">
+      <div class="chart-legend" id="chartLegend"></div>
+      <div style="position:relative;height:280px;">
+        <canvas id="accChart" role="img" aria-label="Bar chart comparing accuracy of 6 ML models. Gradient Boosting is highest at 93.08%.">Accuracy comparison: Gradient Boosting 93.08%, Random Forest 91.82%, Decision Tree 87.42%, SVM 80.19%, Logistic Regression 77.36%, KNN 67.30%.</canvas>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ DETAILED COMPARISON GRID ══════════ -->
+<section class="cmp-sec">
+  <div class="cmp-in">
+    <div class="eyebrow rv">Performance</div>
+    <h2 class="sec-title rv d1">Detailed Model Comparison</h2>
+    <p class="cmp-sub rv d2">
+      6 models trained on Parkinson's UCI dataset 
+    </p>
+
+    <div class="cgrid rv d3">
+
+      <!-- Gradient Boosting — BEST -->
+      <div class="ccol best">
+        <div class="chead" style="padding-top:2.4rem;">
+          <div class="bbadge">★ Best Model</div>
+          <div class="cname">Gradient Boosting</div>
+          <div class="ctype">Ensemble / Boosting</div>
+        </div>
+        <div class="crow"><div class="clabel">Accuracy</div><div class="cval">93.08%</div><div class="mbar-w"><div class="mbar" data-w="93"></div></div></div>
+        <div class="crow"><div class="clabel">Precision (0)</div><div class="cval">0.94</div><div class="mbar-w"><div class="mbar" data-w="94"></div></div></div>
+        <div class="crow"><div class="clabel">Recall (0)</div><div class="cval">0.88</div><div class="mbar-w"><div class="mbar" data-w="88"></div></div></div>
+        <div class="crow"><div class="clabel">F1 (0)</div><div class="cval">0.91</div><div class="mbar-w"><div class="mbar" data-w="91"></div></div></div>
+      </div>
+
+      <!-- Random Forest -->
+      <div class="ccol">
+        <div class="chead"><div class="cname">Random Forest</div><div class="ctype">Ensemble / Bagging</div></div>
+        <div class="crow"><div class="clabel">Accuracy</div><div class="cval">91.82%</div><div class="mbar-w"><div class="mbar" data-w="92"></div></div></div>
+        <div class="crow"><div class="clabel">Precision (0)</div><div class="cval">0.95</div><div class="mbar-w"><div class="mbar" data-w="95"></div></div></div>
+        <div class="crow"><div class="clabel">Recall (0)</div><div class="cval">0.82</div><div class="mbar-w"><div class="mbar" data-w="82"></div></div></div>
+        <div class="crow"><div class="clabel">F1 (0)</div><div class="cval">0.88</div><div class="mbar-w"><div class="mbar" data-w="88"></div></div></div>
+      </div>
+
+      <!-- Decision Tree -->
+      <div class="ccol">
+        <div class="chead"><div class="cname">Decision Tree</div><div class="ctype">Tree-Based</div></div>
+        <div class="crow"><div class="clabel">Accuracy</div><div class="cval">87.42%</div><div class="mbar-w"><div class="mbar" data-w="87"></div></div></div>
+        <div class="crow"><div class="clabel">Precision (0)</div><div class="cval">0.83</div><div class="mbar-w"><div class="mbar" data-w="83"></div></div></div>
+        <div class="crow"><div class="clabel">Recall (0)</div><div class="cval">0.83</div><div class="mbar-w"><div class="mbar" data-w="83"></div></div></div>
+        <div class="crow"><div class="clabel">F1 (0)</div><div class="cval">0.83</div><div class="mbar-w"><div class="mbar" data-w="83"></div></div></div>
+      </div>
+
+      <!-- SVM -->
+      <div class="ccol">
+        <div class="chead"><div class="cname">SVM</div><div class="ctype">Support Vector</div></div>
+        <div class="crow"><div class="clabel">Accuracy</div><div class="cval">80.19%</div><div class="mbar-w"><div class="mbar" data-w="80"></div></div></div>
+        <div class="crow"><div class="clabel">Precision (0)</div><div class="cval">0.71</div><div class="mbar-w"><div class="mbar" data-w="71"></div></div></div>
+        <div class="crow"><div class="clabel">Recall (0)</div><div class="cval">0.80</div><div class="mbar-w"><div class="mbar" data-w="80"></div></div></div>
+        <div class="crow"><div class="clabel">F1 (0)</div><div class="cval">0.75</div><div class="mbar-w"><div class="mbar" data-w="75"></div></div></div>
+      </div>
+
+      <!-- Logistic Regression -->
+      <div class="ccol">
+        <div class="chead"><div class="cname">Logistic Reg.</div><div class="ctype">Linear Baseline</div></div>
+        <div class="crow"><div class="clabel">Accuracy</div><div class="cval">77.36%</div><div class="mbar-w"><div class="mbar" data-w="77"></div></div></div>
+        <div class="crow"><div class="clabel">Precision (0)</div><div class="cval">0.66</div><div class="mbar-w"><div class="mbar" data-w="66"></div></div></div>
+        <div class="crow"><div class="clabel">Recall (0)</div><div class="cval">0.81</div><div class="mbar-w"><div class="mbar" data-w="81"></div></div></div>
+        <div class="crow"><div class="clabel">F1 (0)</div><div class="cval">0.73</div><div class="mbar-w"><div class="mbar" data-w="73"></div></div></div>
+      </div>
+
+      <!-- KNN -->
+      <div class="ccol">
+        <div class="chead"><div class="cname">KNN</div><div class="ctype">Nearest Neighbour</div></div>
+        <div class="crow"><div class="clabel">Accuracy</div><div class="cval">67.30%</div><div class="mbar-w"><div class="mbar" data-w="67"></div></div></div>
+        <div class="crow"><div class="clabel">Precision (0)</div><div class="cval">0.57</div><div class="mbar-w"><div class="mbar" data-w="57"></div></div></div>
+        <div class="crow"><div class="clabel">Recall (0)</div><div class="cval">0.55</div><div class="mbar-w"><div class="mbar" data-w="55"></div></div></div>
+        <div class="crow"><div class="clabel">F1 (0)</div><div class="cval">0.56</div><div class="mbar-w"><div class="mbar" data-w="56"></div></div></div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ FOOTER ══════════ -->
+<footer>
+  <p>
+    <span class="fn">Parkinson's Disease Prediction System</span>
+    &nbsp;|&nbsp; BS Computer Science &nbsp;|&nbsp; University of South Asia, Lahore
+  </p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+// ── MODEL DATA (real values from notebook) ──
+const MODELS = [
+  {name:'Gradient Boosting', short:'GB',  acc:93.08, badge:'best', note:'Ensemble / Boosting', color:'#f97316'},
+  {name:'Random Forest',     short:'RF',  acc:91.82, badge:'good', note:'Ensemble / Bagging',  color:'#a78bfa'},
+  {name:'Decision Tree',     short:'DT',  acc:87.42, badge:'good', note:'Tree-Based',           color:'#a78bfa'},
+  {name:'SVM',               short:'SVM', acc:80.19, badge:'avg',  note:'Support Vector',       color:'#6d28d9'},
+  {name:'Logistic Reg.',     short:'LR',  acc:77.36, badge:'avg',  note:'Linear Baseline',      color:'#6d28d9'},
+  {name:'KNN',               short:'KNN', acc:67.30, badge:'avg',  note:'Nearest Neighbour',    color:'#4c1d95'},
+];
+
+// ── PARTICLES ──
+(function(){
+  const p=document.getElementById('particles');
+  for(let i=0;i<32;i++){
+    const d=document.createElement('div');d.className='pt';
+    const s=Math.random()*6+3,l=Math.random()*100,
+          dur=Math.random()*20+12,del=Math.random()*22,
+          dx=(Math.random()-.5)*130;
+    d.style.cssText=`width:${s}px;height:${s}px;left:${l}%;animation-duration:${dur}s;animation-delay:-${del}s;--dx:${dx}px;`;
+    p.appendChild(d);
+  }
+})();
+
+// ── CURSOR GLOW ──
+const cg=document.getElementById('cg');
+document.addEventListener('mousemove',e=>{
+  cg.style.left=e.clientX+'px';cg.style.top=e.clientY+'px';
+});
+
+// ── WAVEFORM ──
+(function(){
+  const w=document.getElementById('waveformViz');
+  const heights=[12,22,35,50,62,70,65,55,42,30,45,58,68,72,60,48,35,25,18,28,40,55,65,60,45];
+  heights.forEach((h,i)=>{
+    const b=document.createElement('div');b.className='wbar';
+    b.style.cssText=`--h:${h}px;animation-duration:${0.8+Math.random()*0.8}s;animation-delay:${i*0.06}s;`;
+    w.appendChild(b);
+  });
+})();
+
+// ── SCROLL REVEAL ──
+const obs=new IntersectionObserver(es=>{
+  es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('in');});
+},{threshold:.1});
+document.querySelectorAll('.rv').forEach(el=>obs.observe(el));
+
+// ── BAR MINI BARS ──
+const bObs=new IntersectionObserver(es=>{
+  es.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.querySelectorAll('.mbar').forEach(b=>{
+        setTimeout(()=>{b.style.width=b.getAttribute('data-w')+'%';},300);
+      });
+      bObs.unobserve(e.target);
+    }
+  });
+},{threshold:.12});
+document.querySelectorAll('.cgrid').forEach(g=>bObs.observe(g));
+
+// ── 3D TILT ON HERO CARDS ──
+document.querySelectorAll('.mbox').forEach(c=>{
+  c.addEventListener('mousemove',e=>{
+    const r=c.getBoundingClientRect();
+    const x=(e.clientX-r.left)/r.width-.5;
+    const y=(e.clientY-r.top)/r.height-.5;
+    c.style.transition='transform .08s linear,border-color .3s,box-shadow .3s';
+    c.style.transform=`translateY(-12px) scale(1.02) rotateX(${-y*8}deg) rotateY(${x*8}deg)`;
+  });
+  c.addEventListener('mouseleave',()=>{
+    c.style.transition='transform .6s cubic-bezier(.34,1.56,.64,1),border-color .3s,box-shadow .3s';
+    c.style.transform='';
+  });
+});
+
+// ── ACCURACY RINGS ──
+const grid=document.getElementById('accGrid');
+MODELS.forEach((m,i)=>{
+  const circ=220;
+  const fill=Math.round((m.acc/100)*circ);
+  const isBest=m.badge==='best';
+  const isGood=m.badge==='good';
+  const strokeGrad=isBest?'url(#orgGrad)':isGood?'url(#purpGrad)':'url(#grayGrad)';
+  const badgeCls=isBest?'badge-best':isGood?'badge-good':'badge-avg';
+  const cardCls=isBest?'acc-card best-card':'acc-card';
+  const del=(i*0.13).toFixed(2);
+
+  const div=document.createElement('div');
+  div.className=cardCls;
+  div.style.transitionDelay=del+'s';
+  div.innerHTML=`
+    <div class="acc-rank">#${i+1}</div>
+    <div class="acc-model">${m.name}</div>
+    <div class="acc-ring-wrap">
+      <svg width="80" height="80" viewBox="0 0 80 80">
+        <circle class="acc-ring-bg" cx="40" cy="40" r="35" fill="none" stroke-width="5"/>
+        <circle class="acc-ring-fg" cx="40" cy="40" r="35" fill="none" stroke-width="5"
+          stroke="${strokeGrad}" stroke-linecap="round"
+          data-fill="${fill}" stroke-dashoffset="${circ}"/>
+      </svg>
+      <div class="acc-num">${m.acc}%</div>
+    </div>
+    ${isBest?`<span class="acc-badge badge-best">★ Best Model</span>`:
+      isGood?`<span class="acc-badge badge-good">Strong</span>`:
+              `<span class="acc-badge badge-avg">Baseline</span>`}
+  `;
+  grid.appendChild(div);
+});
+
+const ringObs=new IntersectionObserver(es=>{
+  es.forEach(e=>{
+    if(e.isIntersecting){
+      grid.querySelectorAll('.acc-card').forEach((c,i)=>{
+        setTimeout(()=>c.classList.add('in'),i*80);
+      });
+      setTimeout(()=>{
+        grid.querySelectorAll('.acc-ring-fg').forEach(r=>{
+          const target=parseInt(r.getAttribute('data-fill'));
+          r.style.transition='stroke-dashoffset 1.6s cubic-bezier(.34,1.56,.64,1)';
+          r.style.strokeDashoffset=220-target;
+        });
+      },200);
+      ringObs.unobserve(e.target);
+    }
+  });
+},{threshold:.1});
+ringObs.observe(grid);
+
+// ── CHART LEGEND ──
+const legendEl=document.getElementById('chartLegend');
+MODELS.forEach(m=>{
+  const span=document.createElement('span');
+  span.innerHTML=`<span class="leg-dot" style="background:${m.color};"></span>${m.name}`;
+  span.style.display='flex';span.style.alignItems='center';
+  legendEl.appendChild(span);
+});
+
+// ── BAR CHART ──
+const chartObs=new IntersectionObserver(es=>{
+  es.forEach(e=>{
+    if(e.isIntersecting){
+      new Chart(document.getElementById('accChart'),{
+        type:'bar',
+        data:{
+          labels:MODELS.map(m=>m.short),
+          datasets:[{
+            label:'Accuracy %',
+            data:MODELS.map(m=>m.acc),
+            backgroundColor:MODELS.map(m=>m.color),
+            borderRadius:6,borderSkipped:false,
+          }]
+        },
+        options:{
+          responsive:true,maintainAspectRatio:false,
+          animation:{duration:1400,easing:'easeOutQuart'},
+          plugins:{
+            legend:{display:false},
+            tooltip:{
+              callbacks:{
+                label:ctx=>`${ctx.parsed.y}% accuracy`,
+                title:ctx=>[MODELS[ctx[0].dataIndex].name]
+              },
+              backgroundColor:'rgba(24,8,64,.95)',borderColor:'rgba(196,181,253,.2)',borderWidth:1,
+              titleColor:'#ede9fe',bodyColor:'#a78bfa',padding:10,
+            }
+          },
+          scales:{
+            y:{
+              min:55,max:100,
+              ticks:{callback:v=>v+'%',color:'rgba(167,139,250,.5)',font:{size:11}},
+              grid:{color:'rgba(196,181,253,.06)'},border:{color:'rgba(196,181,253,.1)'}
+            },
+            x:{
+              ticks:{color:'rgba(167,139,250,.7)',font:{size:12}},
+              grid:{display:false},border:{color:'rgba(196,181,253,.1)'}
+            }
+          }
+        }
+      });
+      chartObs.unobserve(e.target);
+    }
+  });
+},{threshold:.2});
+chartObs.observe(document.getElementById('accChart'));
+
+// ── TYPEWRITER ──
+(function(){
+  const el=document.getElementById('typewriterLine');
+  if(!el)return;
+  const text='A dual-model ML system · Clinical biomarkers + Vocal signal patterns · High-precision Parkinson\'s screening';
+  const caret=document.createElement('span');
+  caret.className='typing-caret';
+  el.appendChild(caret);
+  let i=0;
+  function type(){
+    if(i<text.length){
+      const s=document.createElement('span');
+      s.className='type-char';
+      s.textContent=text[i];
+      el.insertBefore(s,caret);
+      requestAnimationFrame(()=>requestAnimationFrame(()=>s.classList.add('visible')));
+      i++;
+      setTimeout(type,text[i-1]===' '?55:Math.random()*45+25);
+    }
+  }
+  setTimeout(type,900);
+})();
+
+/* ── GALAXY STAR CANVAS ── */
+(function(){
+  const canvas=document.getElementById('galaxy'),ctx=canvas.getContext('2d');
+  let W,H,stars=[];
+  function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;}
+  resize();window.addEventListener('resize',resize);
+  for(let i=0;i<260;i++){
+    stars.push({
+      x:Math.random()*window.innerWidth,y:Math.random()*window.innerHeight,
+      r:Math.random()*1.4+0.2,alpha:Math.random(),
+      speed:Math.random()*0.006+0.002,phase:Math.random()*Math.PI*2,
+      color:['rgba(196,181,253,','rgba(249,115,22,','rgba(45,212,191,','rgba(255,255,255,'][Math.floor(Math.random()*4)]
+    });
+  }
+  let shooters=[];
+  function addShooter(){
+    shooters.push({x:Math.random()*W,y:Math.random()*H*0.4,
+      vx:3+Math.random()*4,vy:1.5+Math.random()*2,
+      alpha:1,life:0,maxLife:60+Math.random()*40});
+  }
+  setInterval(addShooter,2800);
+  function draw(){
+    ctx.clearRect(0,0,W,H);const t=Date.now()*0.001;
+    stars.forEach(s=>{
+      s.alpha=0.3+0.5*Math.sin(t*s.speed*6+s.phase);
+      ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+      ctx.fillStyle=s.color+s.alpha+')';ctx.fill();
+    });
+    shooters=shooters.filter(sh=>sh.life<sh.maxLife);
+    shooters.forEach(sh=>{
+      sh.life++;sh.x+=sh.vx;sh.y+=sh.vy;
+      const progress=sh.life/sh.maxLife,alpha=(1-progress)*0.7;
+      const grad=ctx.createLinearGradient(sh.x-sh.vx*15,sh.y-sh.vy*15,sh.x,sh.y);
+      grad.addColorStop(0,'rgba(255,255,255,0)');
+      grad.addColorStop(1,`rgba(196,181,253,${alpha})`);
+      ctx.beginPath();ctx.moveTo(sh.x-sh.vx*15,sh.y-sh.vy*15);ctx.lineTo(sh.x,sh.y);
+      ctx.strokeStyle=grad;ctx.lineWidth=1.5;ctx.stroke();
+      ctx.beginPath();ctx.arc(sh.x,sh.y,1.5,0,Math.PI*2);
+      ctx.fillStyle=`rgba(255,255,255,${alpha})`;ctx.fill();
+    });
+    requestAnimationFrame(draw);
+  }draw();
+})();
+</script>
+</body>
+</html>
