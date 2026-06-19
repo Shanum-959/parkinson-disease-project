@@ -1,4 +1,5 @@
 <img width="1440" height="3004" alt="image" src="https://github.com/user-attachments/assets/ab838247-bc8a-4a95-8097-6278275865fa" />
+
 # Parkinson's Disease Detection System
 
 [![Python 3.x](https://img.shields.io/badge/Python-3.x-blue)](https://www.python.org/)
@@ -8,22 +9,14 @@
 
 A **dual-pathway machine learning web application** that detects Parkinson's Disease using clinical biomarkers and voice acoustic features — built with Flask, Scikit-learn, and trained on two complementary datasets.
 
-![Project Overview](https://github.com/Shanum-959/parkinson-disease-project/blob/master/static/screenshot.png)
-
 ---
 
-## Overview
+## Project Overview
 
-Parkinson's Disease is a progressive neurological disorder, and early detection can significantly improve patient outcomes. This project takes a **dual-pathway approach**, training separate models on two independent data sources and comparing six classification algorithms to find the most reliable detector for each.
-
-| Metric | Value |
-|---|---|
-| Clinical model accuracy | **93.08%** |
-| Voice model accuracy | **89.74%** |
-| ML classifiers trained | 6 |
-| Datasets used | 2 |
-| Patient records | 12,105 |
-| Voice recordings | 195 |
+| | | |
+|---|---|---|
+| **93.08%** Clinical model accuracy | **89.74%** Voice model accuracy | **6** ML classifiers trained |
+| **2** Datasets used | **12,105** Patient records | **195** Voice recordings |
 
 ---
 
@@ -43,18 +36,22 @@ Parkinson's Disease is a progressive neurological disorder, and early detection 
 ## Datasets
 
 ### Clinical Tabular Dataset
-- **Samples:** 12,105
-- **Features:** 33
-- **Best model:** Gradient Boosting
-- **Imbalance handling:** `class_weight`
-- **Source:** Kaggle
+| Field | Value |
+|---|---|
+| Samples | 12,105 |
+| Features | 33 |
+| Best model | Gradient Boosting |
+| Imbalance handling | `class_weight` |
+| Source | Kaggle |
 
 ### Voice Biomedical Dataset
-- **Samples:** 195
-- **Features:** 22
-- **Best model:** Random Forest
-- **Imbalance handling:** SMOTE
-- **Source:** UCI Machine Learning Repository
+| Field | Value |
+|---|---|
+| Samples | 195 |
+| Features | 22 |
+| Best model | Random Forest |
+| Imbalance handling | SMOTE |
+| Source | UCI Machine Learning Repository |
 
 ---
 
