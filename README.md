@@ -1,5 +1,4 @@
 <img width="1440" height="3004" alt="image" src="https://github.com/user-attachments/assets/ab838247-bc8a-4a95-8097-6278275865fa" />
-
 # Parkinson's Disease Detection System
 
 [![Python 3.x](https://img.shields.io/badge/Python-3.x-blue)](https://www.python.org/)
@@ -67,7 +66,7 @@ A **dual-pathway machine learning web application** that detects Parkinson's Dis
 
 ## Tech Stack
 
-`Python` · `Flask` · `Scikit-learn` · `NumPy` · `Pandas` · `Librosa` · `Joblib` · `HTML/CSS`
+`Python` · `Flask` · `Scikit-learn` · `NumPy` · `Pandas` · `Matplotlib` · `Seaborn` · `Librosa` · `Joblib` · `HTML/CSS`
 
 ---
 
@@ -93,10 +92,26 @@ http://127.0.0.1:5000
 
 ---
 
+## Data Preprocessing & Analysis
+
+Before model training, the raw datasets went through a dedicated preprocessing and exploratory analysis pipeline, documented in [`notebooks/analysis.ipynb`](notebooks/analysis.ipynb):
+
+- **Outlier removal** using the IQR (Interquartile Range) method
+- **Feature scaling** with StandardScaler
+- **Dimensionality reduction** using PCA
+- **Class imbalance handling** using SMOTE (for the voice dataset) and `class_weight` (for the clinical dataset)
+- **Exploratory data analysis** with visualizations built using Matplotlib and Seaborn
+
+This preprocessing and analysis stage was applied before feeding data into the six classifiers compared above.
+
+---
+
 ## Project Structure
 
 ```
 parkinson-disease-project/
+├── notebooks/
+│   └── analysis.ipynb   # Data preprocessing & exploratory analysis (IQR, PCA, SMOTE, scaling, visualizations)
 ├── models/          # Trained ML models
 ├── templates/        # HTML templates
 ├── app.py             # Flask application entry point
